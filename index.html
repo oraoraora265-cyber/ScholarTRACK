@@ -738,44 +738,7 @@ function renderScholars(){
   renderSchTable();
 }
 
-  // ── FIREBASE ───────────────────────────────────────────────────────────────
-import { initializeApp }                              from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs,
-         setDoc, deleteDoc }                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC_vfVL4n5LsuvlacoAA-BQP9zNu_iY0Mc",
-  authDomain: "scholartrack-93662.firebaseapp.com",
-  databaseURL: "https://scholartrack-93662-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "scholartrack-93662",
-  storageBucket: "scholartrack-93662.firebasestorage.app",
-  messagingSenderId: "1095680033189",
-  appId: "1:1095680033189:web:5a471534af151f7bb9a84c"
-};
-
-const firebaseApp = initializeApp(firebaseConfig);
-const firestore   = getFirestore(firebaseApp);
-const SCHOLARS    = collection(firestore, 'scholars');
-
-function generateId() {
-  const now = Date.now().toString(36).toUpperCase();
-  const rand = Math.random().toString(36).slice(2,5).toUpperCase();
-  return `SIL-${rand}${now.slice(-3)}`;
-}
-
-function renderSchTable(){
-  const isAdmin=cUser.role==='admin';
-  const bf=document.getElementById('batch-f')?.value||'';
-  const sf=document.getElementById('status-f')?.value||'';
-  const q=schSearch.toLowerCase();
-
-  let list=db.scholars.filter(s=>{
-    const name=`${s.fn} ${s.mn} ${s.ln} ${s.course} ${s.addr} ${s.em||''}`.toLowerCase();
-    const mq=!q||name.includes(q);
-    const mb=!bf||String(s.batch)===bf;
-    const ms=!sf||(sf==='employed'?s.stat==='employed':s.stat===sf);
-    return mq&&mb&&ms;
-  });
 
   document.getElementById('sch-body').innerHTML=list.map(s=>`
     <tr>
@@ -1137,21 +1100,7 @@ document.querySelectorAll('.mbg').forEach(bg=>{
   bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');});
 });
 
-  // ── INIT ───────────────────────────────────────────────────────────────────
-injectLogos();
-showToast('Connecting to database…','info');
-getDocs(SCHOLARS).then(async snap => {
-  db = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-  if (db.length === 0) {
-    showToast('Seeding demo data…','info');
-    await seedDemo();
-  }
-  render();
-  showToast('Database connected ✓','success');
-}).catch(e => {
-  showToast('Database connection failed! Check console.','error');
-  console.error('Firebase init error:', e);
-});
+  
 
 </script>
 </body>
