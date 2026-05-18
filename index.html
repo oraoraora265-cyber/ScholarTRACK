@@ -443,7 +443,7 @@ tr:hover td{background:rgba(180,130,30,0.04);}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDocs, addDoc, setDoc,
+  getFirestore, collection, doc, getDocs, addDoc,
   updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -471,6 +471,7 @@ let editingId = null;
 let schSearch = '';
 let unsubScholars = null;
 let unsubUsers    = null;
+let unsubRecent   = null;
 
 // ── SEED DATA ─────────────────────────────────────────────────
 const SEED_SCHOLARS = [
@@ -523,8 +524,7 @@ async function init() {
     });
 
     // ── Real-time listener: Recent Scholars ordered by createdAt desc ──
-    const recentQ = query(SCHOLARS_COL, orderBy('createdAt', 'desc'));
-    onSnapshot(recentQ, snap => {
+    unsubRecent = onSnapshot(query(SCHOLARS_COL, orderBy('createdAt', 'desc')), snap => {
       const recentList = snap.docs.slice(0, 5).map(d => ({ id: d.id, ...d.data() }));
       renderRecentScholars(recentList);
     });
@@ -572,6 +572,9 @@ window.doLogin = function() {
 };
 
 window.doLogout = function() {
+  if (unsubScholars) { unsubScholars(); unsubScholars = null; }
+  if (unsubUsers)    { unsubUsers();    unsubUsers    = null; }
+  if (unsubRecent)   { unsubRecent();   unsubRecent   = null; }
   cUser = null;
   document.getElementById('app').style.display  = 'none';
   document.getElementById('login-screen').style.display = 'flex';
@@ -1198,3 +1201,6 @@ init();
 </script>
 </body>
 </html>
+
+
+
