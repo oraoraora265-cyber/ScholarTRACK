@@ -522,6 +522,13 @@ async function init() {
       users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     });
 
+    // ── Real-time listener: Recent Scholars ordered by createdAt desc ──
+    const recentQ = query(SCHOLARS_COL, orderBy('createdAt', 'desc'));
+    onSnapshot(recentQ, snap => {
+      const recentList = snap.docs.slice(0, 5).map(d => ({ id: d.id, ...d.data() }));
+      renderRecentScholars(recentList);
+    });
+
     await new Promise(resolve => {
       const unsub = onSnapshot(SCHOLARS_COL, () => { unsub(); resolve(); });
     });
@@ -722,6 +729,21 @@ function renderDashboard() {
       <td>${statusBadge(s.stat,s.etype)}</td>
     </tr>
   `).join('');
+}
+
+// ── Real-time recent scholars renderer (called by dedicated onSnapshot) ──
+function renderRecentScholars(list) {
+  const tbody = document.getElementById('dash-recent');
+  if (!tbody) return;
+  tbody.innerHTML = list.map(s => `
+    <tr style="cursor:pointer;" onclick="viewScholar('${s.id}')">
+      <td class="tdn">${s.fn} ${s.ln}</td>
+      <td><span class="badge b-batch">Batch ${s.batch}</span></td>
+      <td>${stypeBadge(s.stype)}</td>
+      <td style="font-size:12px;">${s.course}</td>
+      <td>${statusBadge(s.stat,s.etype)}</td>
+    </tr>
+  `).join('') || `<tr><td colspan="5"><div class="empty"><div class="ei">🎓</div><p>No scholars yet</p></div></td></tr>`;
 }
 
 // ── DRILLDOWN ─────────────────────────────────────────────────
